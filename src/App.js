@@ -5,23 +5,11 @@ import "./App.css";
 
 function App() {
   const [movies, setMovies] = useState([]);
-  const dummyMovies = [
-    {
-      id: 1,
-      title: "Some Dummy Movie",
-      openingText: "This is the opening text of the movie",
-      releaseDate: "2021-05-18",
-    },
-    {
-      id: 2,
-      title: "Some Dummy Movie 2",
-      openingText: "This is the second opening text of the movie",
-      releaseDate: "2021-05-19",
-    },
-  ];
+  const [isLoading, setisLoading] = useState(false);
 
   async function fetchMoviesHandler() {
     try {
+      setisLoading(true);
       const response = await fetch("https://swapi.dev/api/films");
       //convert to json()
       const data = await response.json();
@@ -38,6 +26,7 @@ function App() {
 
       //set movies to the new array.
       setMovies(transformedMovies);
+      setisLoading(false);
     } catch (error) {
       console.log("Endpoint Error:", error);
     }
@@ -49,7 +38,8 @@ function App() {
         <button onClick={fetchMoviesHandler}>Fetch Movies</button>
       </section>
       <section>
-        <MoviesList movies={movies} />
+        {!isLoading && <MoviesList movies={movies} />}
+        {isLoading && <p>Loading...</p>}
       </section>
     </React.Fragment>
   );
