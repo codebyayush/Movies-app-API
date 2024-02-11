@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 import MoviesList from "./components/MoviesList";
 import "./App.css";
@@ -10,7 +10,7 @@ function App() {
   const [intervalId, setIntervalId] = useState(null);
   const [cancelClick, setCancelClick] = useState(false);
 
-  async function fetchMoviesHandler() {
+  const fetchMoviesHandler = useCallback(async () => {
     setisLoading(true);
     setError(null);
 
@@ -21,10 +21,8 @@ function App() {
         throw Error("Something went wrong... Retrying");
       }
 
-      // Convert to json()
       const data = await response.json();
 
-      // Changing movie data the way we want
       const transformedMovies = data.results.map((movieData) => ({
         id: movieData.episode_id,
         title: movieData.title,
@@ -41,21 +39,25 @@ function App() {
       setisLoading(false);
     }
     setisLoading(false);
-  }
+  }, [intervalId]);
 
-  const startRetryInterval = () => {
+  const startRetryInterval = useCallback(() => {
     setCancelClick(false);
     clearInterval(intervalId);
     const id = setInterval(fetchMoviesHandler, 5000);
     setIntervalId(id);
-  };
+  }, [intervalId, fetchMoviesHandler]);
 
-  const cancelHandler = () => {
+  const cancelHandler = useCallback(() => {
     clearInterval(intervalId);
     setIntervalId(null);
     setisLoading(false);
     setCancelClick(true);
-  };
+  }, [intervalId]);
+
+  useEffect(() => {
+    fetchMoviesHandler();
+  }, []);
 
   useEffect(() => {
     // Cleanup interval on component unmount
