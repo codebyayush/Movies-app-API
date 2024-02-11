@@ -1,0 +1,36 @@
+.form {
+  margin: 1rem auto;
+  height: auto;
+  width: 90%;
+  max-width: 40rem;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+.title-text {
+  margin-bottom: 20px;
+  width: 100%;
+  height: 30px;
+
+  border: 1px solid gray;
+  border-radius: 10px;
+}
+
+.opening-text {
+  margin-bottom: 20px;
+  width: 100%;
+  border: 1px solid gray;
+  border-radius: 15px;
+  font-size: large;
+}
+
+.date {
+  width: 100%;
+  height: 30px;
+}
+
+.form button {
+  margin: auto;
+  margin-left: 40%;
+}
