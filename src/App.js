@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import MoviesList from "./components/MoviesList";
 import "./App.css";
@@ -6,40 +6,83 @@ import "./App.css";
 function App() {
   const [movies, setMovies] = useState([]);
   const [isLoading, setisLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [intervalId, setIntervalId] = useState(null);
+  const [cancelClick, setCancelClick] = useState(false);
 
   async function fetchMoviesHandler() {
+    setisLoading(true);
+    setError(null);
+
     try {
-      setisLoading(true);
       const response = await fetch("https://swapi.dev/api/films");
-      //convert to json()
+
+      if (!response.ok) {
+        throw Error("Something went wrong... Retrying");
+      }
+
+      // Convert to json()
       const data = await response.json();
 
-      // changing moviedata the way we want
-      const transformedMovies = data.results.map((movieData) => {
-        return {
-          id: movieData.episode_id,
-          title: movieData.title,
-          openingText: movieData.opening_crawl,
-          releaseDate: movieData.release_date,
-        };
-      });
+      // Changing movie data the way we want
+      const transformedMovies = data.results.map((movieData) => ({
+        id: movieData.episode_id,
+        title: movieData.title,
+        openingText: movieData.opening_crawl,
+        releaseDate: movieData.release_date,
+      }));
 
-      //set movies to the new array.
       setMovies(transformedMovies);
       setisLoading(false);
+      clearInterval(intervalId);
+      setIntervalId(null);
     } catch (error) {
-      console.log("Endpoint Error:", error);
+      setError(error.message);
+      setisLoading(false);
     }
+    setisLoading(false);
   }
+
+  const startRetryInterval = () => {
+    setCancelClick(false);
+    clearInterval(intervalId);
+    const id = setInterval(fetchMoviesHandler, 5000);
+    setIntervalId(id);
+  };
+
+  const cancelHandler = () => {
+    clearInterval(intervalId);
+    setIntervalId(null);
+    setisLoading(false);
+    setCancelClick(true);
+  };
+
+  useEffect(() => {
+    // Cleanup interval on component unmount
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [intervalId]);
 
   return (
     <React.Fragment>
       <section>
-        <button onClick={fetchMoviesHandler}>Fetch Movies</button>
+        <button onClick={startRetryInterval}>Fetch Movies</button>&nbsp;
+        <button onClick={cancelHandler}>Cancel</button>
       </section>
       <section>
-        {!isLoading && <MoviesList movies={movies} />}
-        {isLoading && <p>Loading...</p>}
+        {cancelClick ? (
+          <p>cancelled</p>
+        ) : (
+          <>
+            {!isLoading && movies.length > 0 && <MoviesList movies={movies} />}
+            {!isLoading && movies.length === 0 && !error && (
+              <p>Found no movies</p>
+            )}
+            {isLoading && <p>Loading...</p>}
+            {!isLoading && error && <p>{error}</p>}
+          </>
+        )}
       </section>
     </React.Fragment>
   );
