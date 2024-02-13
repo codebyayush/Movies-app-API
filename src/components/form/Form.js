@@ -5,7 +5,6 @@ const Form = (props) => {
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const [date, setDate] = useState("");
-  const uniqueKey = Math.random();
 
   function titleOnChange(e) {
     setTitle(e.target.value);
@@ -21,8 +20,6 @@ const Form = (props) => {
 
   const onClickHandler = () => {
     const newMovie = {
-      key: uniqueKey,
-      id: uniqueKey,
       title: title,
       openingText: text,
       releaseDate: date,
@@ -38,7 +35,7 @@ const Form = (props) => {
   return (
     <React.Fragment>
       <div className="form">
-        <label for="title-text">Title</label>
+        <label htmlFor="title-text">Title</label>
         <input
           className="title-text"
           type="text"
